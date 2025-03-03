@@ -1,5 +1,9 @@
 import argparse
-from utils.config import Config
+
+from logging import getLogger
+
+from src.configuration.config import Config
+from src.data import create_dataset
 
 def run(
         model_name,
@@ -7,6 +11,9 @@ def run(
         config,
     ):
     pass
+    dataset = create_dataset(config)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name", "-m", type=str, default="LR", help="name of models")
@@ -20,6 +27,7 @@ if __name__ == "__main__":
     config = Config(yaml_files=args.config_files, config=args.config)
     
     run(model_name=args.model_name, dataset_name=args.dataset_name, config=config)
+    
     # print(config)
 
 
