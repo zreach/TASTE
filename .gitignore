@@ -14,5 +14,6 @@ docs/build/
 wandb/*
 /ray_log*
 
+datas/*
 dataset/*
 *.ipynb
