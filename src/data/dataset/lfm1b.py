@@ -53,26 +53,25 @@ class GeneralDataset(Dataset):
         with open(filepath, "r", encoding=encoding) as f:
             head = f.readline()[:-1]
         for field_type in head.split(field_separator):
-            # import pdb;pdb.set_trace()
             field, ftype = field_type.split(":")
-            try:
-                ftype = FeatureType(ftype)
-            except ValueError:
-                raise ValueError(f"Type {ftype} from field {field} is not supported.")
+            # try:
+            #     ftype = FeatureType(ftype)
+            # except ValueError:
+            #     raise ValueError(f"Type {ftype} from field {field} is not supported.")
             if load_col is not None and field not in load_col:
                 continue
             if unload_col is not None and field in unload_col:
                 continue
-            if isinstance(source, FeatureSource) or source != "link":
-                self.field2source[field] = source
-                self.field2type[field] = ftype
-                if not ftype.value.endswith("seq"):
-                    self.field2seqlen[field] = 1
-                if "float" in ftype.value:
-                    self.field2bucketnum[field] = 2
+            # if isinstance(source, FeatureSource) or source != "link":
+            self.field2source[field] = source
+            self.field2type[field] = ftype
+            if not ftype.value.endswith("seq"):
+                self.field2seqlen[field] = 1
+            if "float" in ftype.value:
+                self.field2bucketnum[field] = 2
             columns.append(field)
             usecols.append(field_type)
-            dtype[field_type] = np.float64 if ftype == FeatureType.FLOAT else str
+            dtype[field_type] = np.float64 if ftype == 'float' else str
 
         if len(columns) == 0:
             self.logger.warning(f"No columns has been loaded from [{source}]")
@@ -109,3 +108,6 @@ class GeneralDataset(Dataset):
                 self.field2seqlen[field] = max_seq_len
 
         return df
+
+class GNNDataset(Dataset):
+    pass
