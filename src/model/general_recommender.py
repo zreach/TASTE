@@ -34,13 +34,24 @@ class GeneralRecommender(nn.Module):
         self.use_audio = config['use_audio']
         self.use_text = config['use_text']
         self.content_feature_type = config['content_feature_type']
+        self.content_embedding_size = config['content_embedding_size']
+        
         if self.use_audio is None:
             self.use_audio = False
         if self.use_text is None:
             self.use_text = False
-        if self.feature_type is None:
-            self.feature_type = 'CLAP' #TODO 设置默认参数
-
+        if self.content_feature_type is None:
+            self.content_feature_type = 'CLAP' #TODO 设置默认参数
+        
+        if self.use_audio:
+            wav_feat_path = config['wav_feat_path']
+            with open(wav_feat_path, 'rb') as fp:
+                    music_features_array = pickle.load(fp)
+        
+        if self.use_text:
+            wav_feat_path = config['wav_feat_path']
+            with open(wav_feat_path, 'rb') as fp:
+                    music_features_array = pickle.load(fp)
 
 
     def __str__(self):
