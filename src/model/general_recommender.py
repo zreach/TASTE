@@ -117,7 +117,144 @@ class GeneralRecommender(nn.Module):
             )
 
         self.first_order_linear = FMFirstOrderLinear(config, dataset)
+    def embed_float_fields(self, float_fields):
+        """Embed the float feature columns
 
+        Args:
+            float_fields (torch.FloatTensor): The input dense tensor. shape of [batch_size, num_float_field]
+
+        Returns:
+            torch.FloatTensor: The result embedding tensor of float columns.
+        """
+        # input Tensor shape : [batch_size, num_float_field]
+        if float_fields is None:
+            return None
+        # [batch_size, num_float_field, embed_dim]
+        float_embedding = self.float_embedding_table(float_fields)
+
+        return float_embedding
+
+    def embed_token_fields(self, token_fields):
+        """Embed the token feature columns
+
+        Args:
+            token_fields (torch.LongTensor): The input tensor. shape of [batch_size, num_token_field]
+
+        Returns:
+            torch.FloatTensor: The result embedding tensor of token columns.
+        """
+        # input Tensor shape : [batch_size, num_token_field]
+        if token_fields is None:
+            return None
+        # [batch_size, num_token_field, embed_dim]
+        token_embedding = self.token_embedding_table(token_fields)
+
+        return token_embedding
+
+    def get_wav_embedding(self, interaction):
+        track_ids = interaction['tracks_id']
+        wav_features = self.id2afeat(track_ids)
+        embed_features = self.wav_mlp(wav_features)
+        return embed_features.unsqueeze(1)
+    
+    def get_text_embedding(self, interaction):
+        track_ids = interaction['tracks_id']
+        text_features = self.id2tfeat(track_ids)
+        # print(wav_features[0])
+        embed_features = self.text_mlp(text_features)
+        return embed_features.unsqueeze(1)
+    
+    def concat_embed_input_fields(self, interaction):
+        
+        sparse_embedding, dense_embedding = self.embed_input_fields(interaction)
+        all_embeddings = []
+        if self.use_audio:
+            wav_embedding = self.get_wav_embedding(interaction) 
+            all_embeddings.append(wav_embedding)
+            self.a_feat =  wav_embedding
+        if self.use_text:
+            text_embedding = self.get_text_embedding(interaction) 
+            all_embeddings.append(text_embedding)
+            self.t_feat = text_embedding
+        if sparse_embedding is not None:
+            all_embeddings.append(sparse_embedding)
+        if dense_embedding is not None and len(dense_embedding.shape) == 3:
+            all_embeddings.append(dense_embedding)
+        
+        return torch.cat(all_embeddings, dim=1)
+
+    def embed_input_fields(self, interaction):
+        """Embed the whole feature columns.
+
+        Args:
+            interaction (Interaction): The input data collection.
+
+        Returns:
+            torch.FloatTensor: The embedding tensor of token sequence columns.
+            torch.FloatTensor: The embedding tensor of float sequence columns.
+        """
+        float_fields = []
+        for field_name in self.float_field_names:
+            if len(interaction[field_name].shape) == 3:
+                float_fields.append(interaction[field_name])
+            else:
+                float_fields.append(interaction[field_name].unsqueeze(1))
+        if len(float_fields) > 0:
+            float_fields = torch.cat(
+                float_fields, dim=1
+            )  # [batch_size, num_float_field, 2]
+        else:
+            float_fields = None
+        # [batch_size, num_float_field] or [batch_size, num_float_field, embed_dim] or None
+        float_fields_embedding = self.embed_float_fields(float_fields)
+
+        float_seq_fields = []
+        for field_name in self.float_seq_field_names:
+            float_seq_fields.append(interaction[field_name])
+
+        float_seq_fields_embedding = self.embed_float_seq_fields(float_seq_fields)
+
+        if float_fields_embedding is None:
+            dense_embedding = float_seq_fields_embedding
+        else:
+            if float_seq_fields_embedding is None:
+                dense_embedding = float_fields_embedding
+            else:
+                dense_embedding = torch.cat(
+                    [float_seq_fields_embedding, float_fields_embedding], dim=1
+                )
+
+        token_fields = []
+        for field_name in self.token_field_names:
+            token_fields.append(interaction[field_name].unsqueeze(1))
+        if len(token_fields) > 0:
+            token_fields = torch.cat(
+                token_fields, dim=1
+            )  # [batch_size, num_token_field, 2]
+        else:
+            token_fields = None
+        # [batch_size, num_token_field, embed_dim] or None
+        token_fields_embedding = self.embed_token_fields(token_fields)
+
+        token_seq_fields = []
+        for field_name in self.token_seq_field_names:
+            token_seq_fields.append(interaction[field_name])
+        # [batch_size, num_token_seq_field, embed_dim] or None
+        token_seq_fields_embedding = self.embed_token_seq_fields(token_seq_fields)
+
+        if token_fields_embedding is None:
+            sparse_embedding = token_seq_fields_embedding
+        else:
+            if token_seq_fields_embedding is None:
+                sparse_embedding = token_fields_embedding
+            else:
+                sparse_embedding = torch.cat(
+                    [token_seq_fields_embedding, token_fields_embedding], dim=1
+                )
+
+        # sparse_embedding shape: [batch_size, num_token_seq_field+num_token_field, embed_dim] or None
+        # dense_embedding shape: [batch_size, num_float_field, 2] or [batch_size, num_float_field, embed_dim] or None
+        return sparse_embedding, dense_embedding
     def __str__(self):
         """
         Model prints with number of trainable parameters
