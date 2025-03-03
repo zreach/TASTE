@@ -1,2 +1,1 @@
-key1: value_from_yaml
-key3: value_from_yaml
+filed_names: [inter, user, user_id, item, item_id]
