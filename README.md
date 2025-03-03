@@ -1,6 +1,6 @@
 # TASTE
 <div align="center">
-    <img src="pics/logo.png" alt="描述" width="200">
+    <img src="pics/logo.png" alt="描述" width="300">
 </div>
 
 
