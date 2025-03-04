@@ -54,15 +54,12 @@ class GeneralDataset(Dataset):
             head = f.readline()[:-1]
         for field_type in head.split(field_separator):
             field, ftype = field_type.split(":")
-            # try:
-            #     ftype = FeatureType(ftype)
-            # except ValueError:
-            #     raise ValueError(f"Type {ftype} from field {field} is not supported.")
+            
             if load_col is not None and field not in load_col:
                 continue
             if unload_col is not None and field in unload_col:
                 continue
-            # if isinstance(source, FeatureSource) or source != "link":
+
             self.field2source[field] = source
             self.field2type[field] = ftype
             if not ftype.value.endswith("seq"):
@@ -81,13 +78,9 @@ class GeneralDataset(Dataset):
             filepath,
             delimiter=field_separator,
             usecols=usecols,
-            # dtype=dtype,
             encoding='utf-8',
-            # encoding='ascii',
-            # engine="python",
         )
-        # import pdb; pdb.set_trace()
-        # 这里的usecols好像不对？
+
         df.columns = columns
 
         seq_separator = self.config["seq_separator"]
