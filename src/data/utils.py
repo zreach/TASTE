@@ -8,6 +8,7 @@ import torch
 
 from src.utils import set_color
 from src.utils.argument_list import dataset_arguments
+from src.sampler import Sampler, RepeatableSampler
 
 def create_dataset(config):
     dataset_module = importlib.import_module("src.data.dataset")
@@ -25,42 +26,51 @@ def create_dataset(config):
     # TODO 存储数据
     return dataset
 
-def load_split_dataloaders(config):
-    """Load split dataloaders if saved dataloaders exist and
-    their :attr:`config` of dataset are the same as current :attr:`config` of dataset.
+def _create_sampler(
+    dataset,
+    built_datasets,
+    distribution: str,
+    repeatable: bool,
+    alpha: float = 1.0,
+    base_sampler=None,
+):
+    phases = ["train", "valid", "test"]
+    sampler = None
+    if distribution != "none":
+        if base_sampler is not None:
+            base_sampler.set_distribution(distribution)
+            return base_sampler
+        if not repeatable:
+            sampler = Sampler(
+                phases,
+                built_datasets,
+                distribution,
+                alpha,
+            )
+        else:
+            sampler = RepeatableSampler(
+                phases,
+                dataset,
+                distribution,
+                alpha,
+            )
+    return sampler
 
-    Args:
-        config (Config): An instance object of Config, used to record parameter information.
-
-    Returns:
-        dataloaders (tuple of AbstractDataLoader or None): The split dataloaders.
-    """
-
-    default_file = os.path.join(
-        config["checkpoint_dir"],
-        f'{config["dataset"]}-for-{config["model"]}-dataloader.pth',
+def create_samplers(config, dataset, built_datasets):
+    train_neg_sample_args, valid_neg_sample_args, test_neg_sample_args = config["train_neg_sample_args"], config["valid_neg_sample_args"], config["test_neg_sample_args"]
+    base_sampler = _create_sampler(
+        dataset,
+        built_datasets,
+        train_neg_sample_args["distribution"],
+        repeatable,
+        train_neg_sample_args["alpha"],
     )
-    dataloaders_save_path = config["dataloaders_save_path"] or default_file
-    if not os.path.exists(dataloaders_save_path):
-        return None
-    with open(dataloaders_save_path, "rb") as f:
-        dataloaders = []
-        for data_loader, generator_state in pickle.load(f):
-            generator = torch.Generator()
-            generator.set_state(generator_state)
-            data_loader.generator = generator
-            data_loader.sampler.generator = generator
-            dataloaders.append(data_loader)
-
-        train_data, valid_data, test_data = dataloaders
-    for arg in dataset_arguments + ["seed", "repeatable", "eval_args"]:
-        if config[arg] != train_data.config[arg]:
-            return None
-    train_data.update_config(config)
-    valid_data.update_config(config)
-    test_data.update_config(config)
-    
-    return train_data, valid_data, test_data
 
 def data_preparation(config, dataset):
-    dataloaders = load_split_dataloaders(config)
+    model_type = config["MODEL_TYPE"]
+    built_datasets = dataset.build()
+
+    train_dataset, valid_dataset, test_dataset = built_datasets
+    train_sampler, valid_sampler, test_sampler = create_samplers(
+        config, dataset, built_datasets
+    )
