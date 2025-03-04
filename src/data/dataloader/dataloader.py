@@ -6,6 +6,7 @@ import torch
 
 from src.data.interaction import Interaction
 from src.data.transform import construct_transform
+from src.utils import InputType, FeatureType, FeatureSource, ModelType
 
 
 class AbstractDataLoader(torch.utils.data.DataLoader):
