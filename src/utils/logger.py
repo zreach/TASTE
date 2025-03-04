@@ -5,6 +5,7 @@ import re
 import hashlib
 
 from colorama import init
+from src.utils import ensure_dir, get_local_time
 
 def init_logger(config):
     """
@@ -29,15 +30,6 @@ def init_logger(config):
     config_str = "".join([str(key) for key in config.final_config_dict.values()])
     md5 = hashlib.md5(config_str.encode(encoding="utf-8")).hexdigest()[:6]
     
-    # use_cb = config['use_cb']
-    # if use_cb is None:
-    #     logfilename = "{}/{}-{}-{}-{}.log".format(
-    #         config["model"], config["model"], config["dataset"], get_local_time(), md5
-    #     )
-    # else:
-    #     logfilename = "{}/{}-{}-{}-{}.log".format(
-    #         config["model"], config["model"], config["dataset"], '-cb', get_local_time(), md5
-    #     )
     if config['task_name'] is None:
         config['task_name'] = 'default'
     logfilename = "{}/{}-{}-{}-{}-{}.log".format(
@@ -68,8 +60,8 @@ def init_logger(config):
     fh = logging.FileHandler(logfilepath)
     fh.setLevel(level)
     fh.setFormatter(fileformatter)
-    remove_color_filter = RemoveColorFilter()
-    fh.addFilter(remove_color_filter)
+    # remove_color_filter = RemoveColorFilter()
+    # fh.addFilter(remove_color_filter)
 
     sh = logging.StreamHandler()
     sh.setLevel(level)

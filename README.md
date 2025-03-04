@@ -24,4 +24,8 @@ After downloading the data, place it in `datas\lfm1b-filtered` and then run the 
 python main.py
 ```
 
-This command runs the framework with the default settings in the simplest way. If adjustments are needed afterward, parameters can be set either through the command line or by using YAML files.
+This command runs the framework with the default settings in the simplest way. If adjustments are needed afterward, parameters can be set either through the command line or by using YAML files，for example:
+
+```
+python main.py --model_name LR --dataset_name lfm1n-filtered ----config_files config/config1.yaml
+```

@@ -48,3 +48,19 @@ def init_seed(seed, reproducibility):
     else:
         torch.backends.cudnn.benchmark = True
         torch.backends.cudnn.deterministic = False
+
+def get_model(model_name):
+    model_module = importlib.import_module("src.model")
+    if hasattr(model_module, model_name):
+        model_class = getattr(model_module, model_name)
+    else:
+        raise ValueError(f"model {model_name} not found")
+    return model_class
+
+def get_trainer(config):
+    trainer_module = importlib.import_module("src.trainer")
+    if hasattr(trainer_module, config["MODEL_TYPE"]):
+        trainer_class = getattr(trainer_module, config["MODEL_TYPE"])
+    else:
+        raise ValueError(f"trainer {config['MODEL_TYPE']} not found")
+    return trainer_class
