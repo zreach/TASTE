@@ -4,7 +4,7 @@ from logging import getLogger
 
 import torch
 
-from src.data.interaction import Interaction
+from src.data.interaction import Interaction, cat_interactions
 from src.data.transform import construct_transform
 from src.utils import InputType, FeatureType, FeatureSource, ModelType
 
@@ -190,7 +190,7 @@ class NegSampleDataLoader(AbstractDataLoader):
         new_data.update(Interaction({self.label_field: labels}))
         return new_data
     def _neg_sample_by_point_wise_sampling(self, inter_feat, neg_item_ids):
-        # TODO: 这里输入的inter_feat是有正有负的，但是又强制全归为了正，为什么
+        # TODO: 这里输入的inter_feat是有正有负的，但是又强制全归为了正
         pos_inter_num = len(inter_feat)
         new_data = inter_feat.repeat(self.times)
         new_data[self.iid_field][pos_inter_num:] = neg_item_ids
@@ -202,3 +202,164 @@ class NegSampleDataLoader(AbstractDataLoader):
 
     def get_model(self, model):
         self.model = model
+
+class TrainDataLoader(NegSampleDataLoader):
+    """:class:`TrainDataLoader` is a dataloader for training.
+    It can generate negative interaction when :attr:`training_neg_sample_num` is not zero.
+    For the result of every batch, we permit that every positive interaction and its negative interaction
+    must be in the same batch.
+
+    Args:
+        config (Config): The config of dataloader.
+        dataset (Dataset): The dataset of dataloader.
+        sampler (Sampler): The sampler of dataloader.
+        shuffle (bool, optional): Whether the dataloader will be shuffle after a round. Defaults to ``False``.
+    """
+
+    def __init__(self, config, dataset, sampler, shuffle=False):
+        self.logger = getLogger()
+        self._set_neg_sample_args(
+            config, dataset, config["MODEL_INPUT_TYPE"], config["train_neg_sample_args"]
+        )
+        self.sample_size = len(dataset)
+        # TODO 在这里对数据集负采样
+        # dataset可以当做
+        super().__init__(config, dataset, sampler, shuffle=shuffle)
+
+    def _init_batch_size_and_step(self):
+        batch_size = self.config["train_batch_size"]
+        if self.neg_sample_args["distribution"] != "none":
+            batch_num = max(batch_size // self.times, 1)
+            new_batch_size = batch_num * self.times
+            self.step = batch_num
+            self.set_batch_size(new_batch_size)
+        else:
+            self.step = batch_size
+            self.set_batch_size(batch_size)
+    def _get_sparse_matrix(self, df_feat, source_field, target_field, form='coo', value_field=None):
+        pass
+    def update_config(self, config):
+        self._set_neg_sample_args(
+            config,
+            self._dataset,
+            config["MODEL_INPUT_TYPE"],
+            config["train_neg_sample_args"],
+        )
+        super().update_config(config)
+
+    def collate_fn(self, index):
+        index = np.array(index)
+        data = self._dataset[index]
+        transformed_data = self.transform(self._dataset, data) # equal
+        return self._neg_sampling(transformed_data)
+
+
+class NegSampleEvalDataLoader(NegSampleDataLoader):
+    """:class:`NegSampleEvalDataLoader` is a dataloader for neg-sampling evaluation.
+    It is similar to :class:`TrainDataLoader` which can generate negative items,
+    and this dataloader also permits that all the interactions corresponding to each user are in the same batch
+    and positive interactions are before negative interactions.
+
+    Args:
+        config (Config): The config of dataloader.
+        dataset (Dataset): The dataset of dataloader.
+        sampler (Sampler): The sampler of dataloader.
+        shuffle (bool, optional): Whether the dataloader will be shuffle after a round. Defaults to ``False``.
+    """
+
+    def __init__(self, config, dataset, sampler, shuffle=False):
+        self.logger = getLogger()
+        phase = sampler.phase if sampler is not None else "test"
+        self._set_neg_sample_args(
+            config, dataset, InputType.POINTWISE, config[f"{phase}_neg_sample_args"]
+        )
+        if (
+            self.neg_sample_args["distribution"] != "none"
+            and self.neg_sample_args["sample_num"] != "none"
+        ):
+            user_num = dataset.user_num
+            dataset.sort(by=dataset.uid_field, ascending=True)
+            self.uid_list = []
+            start, end = dict(), dict()
+            for i, uid in enumerate(dataset.inter_feat[dataset.uid_field].numpy()):
+                if uid not in start:
+                    self.uid_list.append(uid)
+                    start[uid] = i
+                end[uid] = i
+            self.uid2index = np.array([None] * user_num)
+            self.uid2items_num = np.zeros(user_num, dtype=np.int64)
+            for uid in self.uid_list:
+                self.uid2index[uid] = slice(start[uid], end[uid] + 1)
+                self.uid2items_num[uid] = end[uid] - start[uid] + 1
+            self.uid_list = np.array(self.uid_list)
+            self.sample_size = len(self.uid_list)
+        else:
+            self.sample_size = len(dataset)
+        if shuffle:
+            self.logger.warning("NegSampleEvalDataLoader can't shuffle")
+            shuffle = False
+        super().__init__(config, dataset, sampler, shuffle=shuffle)
+
+    def _init_batch_size_and_step(self):
+        batch_size = self.config["eval_batch_size"]
+        if (
+            self.neg_sample_args["distribution"] != "none"
+            and self.neg_sample_args["sample_num"] != "none"
+        ):
+            inters_num = sorted(self.uid2items_num * self.times, reverse=True)
+            batch_num = 1
+            new_batch_size = inters_num[0]
+            for i in range(1, len(inters_num)):
+                if new_batch_size + inters_num[i] > batch_size:
+                    break
+                batch_num = i + 1
+                new_batch_size += inters_num[i]
+            self.step = batch_num
+            self.set_batch_size(new_batch_size)
+        else:
+            self.step = batch_size
+            self.set_batch_size(batch_size)
+
+    def update_config(self, config):
+        phase = self._sampler.phase if self._sampler.phase is not None else "test"
+        self._set_neg_sample_args(
+            config,
+            self._dataset,
+            InputType.POINTWISE,
+            config[f"{phase}_neg_sample_args"],
+        )
+        super().update_config(config)
+
+    def collate_fn(self, index):
+        index = np.array(index)
+        if (
+            self.neg_sample_args["distribution"] != "none"
+            and self.neg_sample_args["sample_num"] != "none"
+            
+        ):
+            uid_list = self.uid_list[index]
+            data_list = []
+            idx_list = []
+            positive_u = []
+            positive_i = torch.tensor([], dtype=torch.int64)
+
+            for idx, uid in enumerate(uid_list):
+                index = self.uid2index[uid]
+                transformed_data = self.transform(self._dataset, self._dataset[index])
+                data_list.append(self._neg_sampling(transformed_data))
+                idx_list += [idx for i in range(self.uid2items_num[uid] * self.times)]
+                positive_u += [idx for i in range(self.uid2items_num[uid])]
+                positive_i = torch.cat(
+                    (positive_i, self._dataset[index][self.iid_field]), 0
+                )
+
+            cur_data = cat_interactions(data_list)
+            idx_list = torch.from_numpy(np.array(idx_list)).long()
+            positive_u = torch.from_numpy(np.array(positive_u)).long()
+
+            return cur_data, idx_list, positive_u, positive_i
+        else:
+            data = self._dataset[index]
+            transformed_data = self.transform(self._dataset, data)
+            cur_data = self._neg_sampling(transformed_data)
+            return cur_data, None, None, None
