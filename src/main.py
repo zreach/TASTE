@@ -3,15 +3,17 @@ import argparse
 from logging import getLogger
 
 from src.configuration.config import Config
-from src.data import create_dataset
+from src.data import create_dataset, data_preparation
 
 def run(
         model_name,
         dataset_name,
         config,
     ):
-    pass
     dataset = create_dataset(config)
+    train_data, valid_data, test_data = data_preparation(config, dataset)
+
+
 
 
 if __name__ == "__main__":
