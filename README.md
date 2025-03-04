@@ -31,3 +31,6 @@ python main.py --model_name LR --dataset_name lfm1n-filtered ----config_files co
 ```
 
 The config files can be a list.
+
+## Future
+We are working on adding more existing models, especially multimodal models.
