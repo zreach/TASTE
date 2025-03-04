@@ -2,7 +2,7 @@ import argparse
 
 from logging import getLogger
 
-from src.configuration.config import Config
+from src.config.config import Config
 from src.data import create_dataset, data_preparation
 from src.data.transform import construct_transform
 from src.utils import (
@@ -29,22 +29,15 @@ def run(
     init_seed(config["seed"] + config["local_rank"], config["reproducibility"])
     model = get_model(model_name)
     
-    transform = construct_transform(config)
-    trainer = get_trainer(config)
+    trainer = get_trainer(config)(config, model)
 
     best_valid_score, best_valid_result = trainer.fit(
-        train_data, valid_data, saved=saved, show_progress=config["show_progress"]
+        train_data, valid_data, saved=save_model, show_progress=config["show_progress"]
     )
 
     # model evaluation
     test_result = trainer.evaluate(
-        test_data, load_best_model=saved, show_progress=config["show_progress"]
-    )
-
-    environment_tb = get_environment(config)
-    logger.info(
-        "The running environment of this training is as follows:\n"
-        + environment_tb.draw()
+        test_data, load_best_model=save_model, show_progress=config["show_progress"]
     )
 
     logger.info(set_color("best valid ", "yellow") + f": {best_valid_result}")
@@ -56,6 +49,8 @@ def run(
         "best_valid_result": best_valid_result,
         "test_result": test_result,
     }
+
+    print(result)
     
 
 

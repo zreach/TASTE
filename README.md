@@ -29,3 +29,5 @@ This command runs the framework with the default settings in the simplest way. I
 ```
 python main.py --model_name LR --dataset_name lfm1n-filtered ----config_files config/config1.yaml
 ```
+
+The config files can be a list.
