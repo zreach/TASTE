@@ -1,6 +1,6 @@
 # TASTE
 <div align="center">
-    <img src="pics/logo.png" alt="描述" width="300">
+    <img src="pics/logo.png" alt="描述" width="400">
 </div>
 
 
@@ -46,5 +46,6 @@ Currently, we have implemented the following models on TASTE:
 | FFM       | RecSys'16   | Field-aware Factorization Machines for CTR Prediction        |
 | WideDeep  | RecSys'16   | Wide & Deep Learning for Recommender Systems                 |
 | xDeepFM   | KDD'18      | xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems |
+
 ## Future
 We are working on adding more existing models, especially multimodal models.
