@@ -35,15 +35,16 @@ The config files can be a list.
 
 Currently, we have implemented the following models on TASTE:
 
-| Model                                                        | Publish     | Paper                                                        |
-| :----------------------------------------------------------- | :---------- | :----------------------------------------------------------- |
-| [**AFM**](https://recbole.io/docs/user_guide/model/context/afm.html) | IJCAI'17    | Attentional Factorization Machines: Learning the Weight of Feature Interactions via |
-| [**DCN**](https://recbole.io/docs/user_guide/model/context/dcn.html) | ADKDD'17    | Deep & Cross Network for Ad Click Predictions                |
-| [**DCN V2**](https://recbole.io/docs/user_guide/model/context/dcnv2.html) | WWW '21    | DCN V2: Improved Deep & Cross Network and Practical Lessons for Web-scale Learning to Rank Systems     |
-| [**DeepFM**](https://recbole.io/docs/user_guide/model/context/deepfm.html) | IJCAI'17    | DeepFM: A Factorization-Machine based Neural Network for CTR Prediction |
-| [**FM**](https://recbole.io/docs/user_guide/model/context/fm.html) | ICDM'10     | Factorization Machines                                       |
-| [**FFM**](https://recbole.io/docs/user_guide/model/context/ffm.html) | RecSys'16   | Field-aware Factorization Machines for CTR Prediction        |
-| [**WideDeep**](https://recbole.io/docs/user_guide/model/context/widedeep.html) | RecSys'16   | Wide & Deep Learning for Recommender Systems                 |
-| [**xDeepFM**](https://recbole.io/docs/user_guide/model/context/xdeepfm.html) | KDD'18      | xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems |
+
+| Model     | Publish     | Paper                                                        |
+| :-------- | :---------- | :----------------------------------------------------------- |
+| AFM       | IJCAI'17    | Attentional Factorization Machines: Learning the Weight of Feature Interactions via |
+| DCN       | ADKDD'17    | Deep & Cross Network for Ad Click Predictions                |
+| DCN V2    | WWW '21     | DCN V2: Improved Deep & Cross Network and Practical Lessons for Web-scale Learning to Rank Systems |
+| DeepFM    | IJCAI'17    | DeepFM: A Factorization-Machine based Neural Network for CTR Prediction |
+| FM        | ICDM'10     | Factorization Machines                                       |
+| FFM       | RecSys'16   | Field-aware Factorization Machines for CTR Prediction        |
+| WideDeep  | RecSys'16   | Wide & Deep Learning for Recommender Systems                 |
+| xDeepFM   | KDD'18      | xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems |
 ## Future
 We are working on adding more existing models, especially multimodal models.
