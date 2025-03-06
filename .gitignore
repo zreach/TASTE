@@ -16,4 +16,4 @@ wandb/*
 
 datas/*
 dataset/*
-*.ipynb
+# *.ipynb
