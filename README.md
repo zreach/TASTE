@@ -16,6 +16,8 @@ Clone this repository to the local machine, then install the dependencies.
 pip install -r requirements.txt
 ```
 
+If you want to manually extract audio features based on your own data and model, you can use the `./notebook/extract_feature.ipynb` in the `./notebooks/` directory. For detailed instructions, please refer to the script files.
+
 ## Quick-Start
 
 After downloading the data, place it in `datas\lfm1b-filtered` and then run the following command:
@@ -56,7 +58,8 @@ We use pre-trained models to extract high-level music information. The following
 | [CLAP](https://github.com/microsoft/clap)      | ICASSP'24    | Natural Language Supervision For General-Purpose Audio Representations |
 | [MuQ](https://github.com/tencent-ailab/MuQ)       | arxiv    | MuQ: Self-Supervised Music Representation Learning with Mel Residual Vector Quantization |
 
-## Overall Results
+## Results
+### Overall Results
 
 | Model     | w/o audio | CLAP   | MuQ    | w/o audio | CLAP   | MuQ    | w/o audio | CLAP   | MuQ    |
 | :-------- | --------- | ------ | ------ | --------- | ------ | ------ | --------- | ------ | ------ |
@@ -70,6 +73,19 @@ We use pre-trained models to extract high-level music information. The following
 | AFM       | 79.97     | 78.92  | 79.01  | 80.69     | 78.87  | 79.38  | 80.42     | 79.01  | 80.19  |
 | DCN       | 78.55     | 78.98  | 79.94  | 81.22     | 80.90  | 81.31  | 81.06     | 79.94  | 81.37  |
 | DCNv2     | 80.33     | **80.82** | **81.23** | **82.27**  | **82.22**  | **82.45**  | **82.24**  | **82.27**  | **82.51**  |
+
+### Cold-start Results
+
+| Model     | All AUC(%) ↑ | All logloss(%) ↓ | All+CLAP AUC(%) ↑ | All+CLAP logloss(%) ↓ | All+MuQ AUC(%) ↑ | All+MuQ logloss(%) ↓ |
+| :-------- | ------------ | ---------------- | ----------------- | --------------------- | ---------------- | -------------------- |
+| FM        | 69.16        | 52.56            | 71.26             | 53.18                 | 72.73            | 52.25                |
+| WideDeep  | 72.65        | 54.44            | 72.76             | 54.42                 | 73.36            | 54.83                |
+| DeepFM    | 73.63        | **51.96**        | **73.57**         | **52.21**             | **75.02**        | **51.69**            |
+| NFM       | 69.11        | 55.83            | 69.03             | 59.48                 | 68.04            | 57.85                |
+| AFM       | 66.69        | 52.48            | 65.04             | 52.97                 | 66.29            | 52.58                |
+| xDeepFM   | 72.18        | 56.90            | 72.01             | 57.18                 | 74.79            | 51.98                |
+| DCN       | 73.86        | 53.05            | 73.16             | 53.32                 | 74.21            | 52.22                |
+| DCNv2     | **74.07**    | 53.27            | 73.54             | 53.58                 | 74.16            | 53.33                |
 
 
 ## Future
