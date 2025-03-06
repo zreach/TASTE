@@ -1,13 +1,28 @@
 # TASTE
 <div align="center">
-    <img src="pics/logo.png" alt="描述" width="400">
+    <img src="pics/logo.png" alt="logo" width="400">
 </div>
 
 
 
-TASTE is a framework for content-augumented Music Recommendation. It is developed for reproducing and developing recommendation algorithms more efficiently. We sincerely appreciate the help provided by [Recbole](https://github.com/RUCAIBox/RecBole)
+TASTE is a framework for content-augumented Music Recommendation. It is developed for reproducing and developing recommendation algorithms with content more efficiently.
 
-The subset of lfm-1b and corresponding embedded wav features can be downloaded here: [Google Drive](https://drive.google.com/drive/folders/1H-wrqchl-QMWrO-13mueeO5t-7nL00JU?usp=sharing)
+The proposed subset of lfm-1b and corresponding embedded wav features can be downloaded here: [Google Drive](https://drive.google.com/drive/folders/1H-wrqchl-QMWrO-13mueeO5t-7nL00JU?usp=sharing)
+
+## Overall
+
+<div align="center">
+    <img src="pics/framework.png" alt="framework" width="600">
+    <p>Figure : Overview of the TASTE framework for content-augmented music recommendation.</p>
+</div>
+
+This framework includes feature extraction, feature fusion, model training, and testing. 
+
+The traditional features are embedded in the way commonly followed: discrete features are processed using one-hot encoding, then mapped to lower-dimensional continuous vectors; continuous features are discretized according to the defined method by default, and then treated as discrete features (other methods can also be used to handle continuous features).
+
+After the audio features are extracted, they pass through trainable MLP layers and are then merged with the previously extracted features to be input into various models, which ultimately output the predicted click-through rate.
+
+Our method is highly compatible with various models because it only adds more features without requiring any changes to the model's structure itself.
 
 ## Usage
 
@@ -87,6 +102,8 @@ We use pre-trained models to extract high-level music information. The following
 | DCN       | 73.86        | 53.05            | 73.16             | 53.32                 | 74.21            | 52.22                |
 | DCNv2     | **74.07**    | 53.27            | 73.54             | 53.58                 | 74.16            | 53.33                |
 
+## Acknowledgement
+We sincerely appreciate the help provided by [Recbole](https://github.com/RUCAIBox/RecBole).
 
 ## Future
 We are working on adding more existing models, especially multimodal models.
