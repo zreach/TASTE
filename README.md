@@ -12,7 +12,7 @@ The proposed subset of lfm-1b and corresponding embedded wav features can be dow
 ## Overall
 
 <div align="center">
-    <img src="pics/framework.png" alt="framework" width="600">
+    <img src="pics/framework.png" alt="framework" width="800">
     <p>Figure : Overview of the TASTE framework for content-augmented music recommendation.</p>
 </div>
 
@@ -33,7 +33,7 @@ pip install -r requirements.txt
 
 If you want to manually extract audio features based on your own data and model, you can use the `./notebook/extract_feature.ipynb` in the `./notebooks/` directory. For detailed instructions, please refer to the script files.
 
-## Quick-Start
+### Quick-Start
 
 After downloading the data, place it in `datas\lfm1b-filtered` and then run the following command:
 
@@ -47,7 +47,7 @@ This command runs the framework with the default settings in the simplest way. I
 python main.py --model_name LR --dataset_name lfm1n-filtered ----config_files config/config1.yaml
 ```
 
-The config files can be a list.
+
 ## Models
 
 Currently, we have implemented the following models on TASTE:
