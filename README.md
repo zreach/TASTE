@@ -85,8 +85,7 @@ Currently, we have implemented the following models on TASTE:
 
 | Model | Publish | paper name |
 | :--- | :--- | :--- |
-| VBPR | AAAI'16 | VBPR: visual Bayesian Personalized
-Ranking from implicit feedback |
+| VBPR | AAAI'16 | VBPR: visual Bayesian Personalized Ranking from implicit feedback |
 | FREEDOM | MM'23 | A tale of two graphs: Freezing and denoising graph structures for multimodal recommendation |
 | LGMRec | AAAI'24 | Lgmrec: Local and global graph learning for multimodal recommendation |
 <!-- | Model     | Publish     | Paper                                                        |
