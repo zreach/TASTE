@@ -20,7 +20,7 @@ This framework includes feature extraction, feature fusion, model training, and 
 
 The traditional features are embedded in the way commonly followed: discrete features are processed using one-hot encoding, then mapped to lower-dimensional continuous vectors; continuous features are discretized according to the defined method by default, and then treated as discrete features (other methods can also be used to handle continuous features).
 
-After the audio features are extracted, they pass through trainable MLP layers and are then merged with the previously extracted features to be input into various models, which ultimately output the predicted click-through rate.
+After the audio and text features are extracted, they pass through trainable MLP layers and are then merged with the previously extracted features to be input into various models, which ultimately output the predicted click-through rate.
 
 Our method is highly compatible with various models because it only adds more features without requiring any changes to the model's structure itself.
 
@@ -52,8 +52,42 @@ python main.py --model_name LR --dataset_name lfm1n-filtered ----config_files co
 
 Currently, we have implemented the following models on TASTE:
 
+### CTR Task
+#### Context-aware Models
 
-| Model     | Publish     | Paper                                                        |
+| Model | Publish | paper name |
+| :--- | :--- | :--- |
+| LR | WWW '07 | Predicting clicks: estimating the click-through rate for new ads |
+| FM | ICDM'10     | Factorization Machines      
+| FFM | RecSys '16 | Field-aware factorization machines for CTR prediction |
+| AFM | IJCAI'17    | Attentional Factorization Machines: Learning the Weight of Feature Interactions via Attention Networks |
+| Wide & Deep | RecSys'16   | Wide & Deep Learning for Recommender Systems    
+| DeepFM | IJCAI'17    | DeepFM: A Factorization-Machine based Neural Network for CTR Prediction |
+| NFM | SIGIR'17 | Neural Factorization Machines for Sparse Predictive Analytics  | 
+| DCN | ADKDD'17    | Deep & Cross Network for Ad Click Predictions
+| xDeepFM | KDD'18      | xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems | 
+| FIGNN | CIKM '19 | Fi-GNN: Modeling Feature Interactions via Graph Neural Networks for CTR Prediction |    
+| DCNv2 | WWW '21     | DCN V2: Improved Deep & Cross Network and Practical Lessons for Web-scale Learning to Rank Systems |
+| MaskNet | arxiv | Masknet: Introducing feature-wise multiplication to CTR ranking models by instance-guided mask |
+| FinalMLP | AAAI'23 | FinalMLP: an enhanced two-stream MLP model for CTR prediction |
+| EulerNet | SIGIR'23 | Eulernet: Adaptive feature interaction learning via euler's formula for ctr prediction |
+| WuKong | ICML'24 | Wukong: Towards a scaling law for large-scale recommendation |
+
+### Recall Task
+#### General Models
+| Model | Publish | paper name |
+| :--- | :--- | :--- |
+| BPR | UAI'09 | BPR: Bayesian personalized ranking from implicit feedback |
+
+#### Multimodel Models
+
+| Model | Publish | paper name |
+| :--- | :--- | :--- |
+| VBPR | AAAI'16 | VBPR: visual Bayesian Personalized
+Ranking from implicit feedback |
+| FREEDOM | MM'23 | A tale of two graphs: Freezing and denoising graph structures for multimodal recommendation |
+| LGMRec | AAAI'24 | Lgmrec: Local and global graph learning for multimodal recommendation |
+<!-- | Model     | Publish     | Paper                                                        |
 | :-------- | :---------- | :----------------------------------------------------------- |
 | AFM       | IJCAI'17    | Attentional Factorization Machines: Learning the Weight of Feature Interactions via Attention Networks |
 | DCN       | ADKDD'17    | Deep & Cross Network for Ad Click Predictions                |
@@ -62,48 +96,28 @@ Currently, we have implemented the following models on TASTE:
 | FM        | ICDM'10     | Factorization Machines                                       |
 | FFM       | RecSys'16   | Field-aware Factorization Machines for CTR Prediction        |
 | WideDeep  | RecSys'16   | Wide & Deep Learning for Recommender Systems                 |
-| xDeepFM   | KDD'18      | xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems |
+| xDeepFM   | KDD'18      | xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems | -->
 
 ## Audio Featrues
 
 We use pre-trained models to extract high-level music information. The following are the models we used:
 
-| Model     | Publish     | Paper 
-| :-------- | :---------- | :----------------------------------------------------------- |
-| [CLAP](https://github.com/microsoft/clap)      | ICASSP'24    | Natural Language Supervision For General-Purpose Audio Representations |
-| [MuQ](https://github.com/tencent-ailab/MuQ)       | arxiv    | MuQ: Self-Supervised Music Representation Learning with Mel Residual Vector Quantization |
+| Model     | Publish     | Paper | 
+| :-------- | :---------- |   :----------------------------------------------------------- | 
+| [CLAP](https://github.com/microsoft/clap)      | ICASSP'22    | Natural Language Supervision For General-Purpose Audio Representations |
+| [MuQ](https://github.com/tencent-ailab/MuQ)       | arxiv    | MuQ: Self-Supervised Music Representation Learning with Mel Residual Vector Quantization  |
+
+The MuQ model has two versions: **MuQ** and **MuQ-mulan**.
+
+* **MuQ** provides the model's raw output, which includes both the number of layers and the time dimension. 
+* **MuQ-mulan** is a fine-tuned version of MuQ, trained specifically on a music-text dataset, and its output has a shape of (512,).
 
 ## Results
-### Overall Results
-
-| Model     | w/o audio | CLAP   | MuQ    | w/o audio | CLAP   | MuQ    | w/o audio | CLAP   | MuQ    |
-| :-------- | --------- | ------ | ------ | --------- | ------ | ------ | --------- | ------ | ------ |
-|           | ID-only   |        |        | ID+Categories |        |        | ID+Categories+Continuous |        |        |
-| LR        | 63.07     | 63.11  | 63.31  | 63.08     | 63.07  | 63.10  | 63.11     | 63.12  | 63.15  |
-| FM        | **80.64** | 79.59  | 80.45  | 80.96     | 81.01  | 81.16  | 81.40     | 80.45  | 81.60  |
-| WideDeep  | 80.16     | 79.55  | 79.95  | 80.53     | 80.56  | 80.59  | 80.58     | 79.95  | 80.90  |
-| DeepFM    | 78.73     | 80.15  | 80.58  | 81.13     | 81.15  | 81.46  | 81.01     | 80.58  | 81.40  |
-| xDeepFM   | 77.51     | 78.55  | 80.58  | 81.29     | 81.78  | 81.61  | 81.11     | 81.22  | 81.74  |
-| NFM       | 78.25     | 78.55  | 78.89  | 79.53     | 79.77  | 80.54  | 79.57     | 78.92  | 80.01  |
-| AFM       | 79.97     | 78.92  | 79.01  | 80.69     | 78.87  | 79.38  | 80.42     | 79.01  | 80.19  |
-| DCN       | 78.55     | 78.98  | 79.94  | 81.22     | 80.90  | 81.31  | 81.06     | 79.94  | 81.37  |
-| DCNv2     | 80.33     | **80.82** | **81.23** | **82.27**  | **82.22**  | **82.45**  | **82.24**  | **82.27**  | **82.51**  |
-
-### Cold-start Results
-
-| Model     | All AUC(%) ↑ | All logloss(%) ↓ | All+CLAP AUC(%) ↑ | All+CLAP logloss(%) ↓ | All+MuQ AUC(%) ↑ | All+MuQ logloss(%) ↓ |
-| :-------- | ------------ | ---------------- | ----------------- | --------------------- | ---------------- | -------------------- |
-| FM        | 69.16        | 52.56            | 71.26             | 53.18                 | 72.73            | 52.25                |
-| WideDeep  | 72.65        | 54.44            | 72.76             | 54.42                 | 73.36            | 54.83                |
-| DeepFM    | 73.63        | **51.96**        | **73.57**         | **52.21**             | **75.02**        | **51.69**            |
-| NFM       | 69.11        | 55.83            | 69.03             | 59.48                 | 68.04            | 57.85                |
-| AFM       | 66.69        | 52.48            | 65.04             | 52.97                 | 66.29            | 52.58                |
-| xDeepFM   | 72.18        | 56.90            | 72.01             | 57.18                 | 74.79            | 51.98                |
-| DCN       | 73.86        | 53.05            | 73.16             | 53.32                 | 74.21            | 52.22                |
-| DCNv2     | **74.07**    | 53.27            | 73.54             | 53.58                 | 74.16            | 53.33                |
 
 ## Acknowledgement
-We sincerely appreciate the help provided by [Recbole](https://github.com/RUCAIBox/RecBole).
+<!-- We sincerely appreciate the help provided by [Recbole](https://github.com/RUCAIBox/RecBole). -->
+
+We gratefully acknowledge the inspiration and guidance we received from frameworks [Recbole](https://github.com/RUCAIBox/RecBole), [MMRec](https://github.com/enoche/MMRec), and [FuxiCTR](https://github.com/reczoo/FuxiCTR).
 
 ## Future
 We are working on adding more existing models, especially multimodal models.
