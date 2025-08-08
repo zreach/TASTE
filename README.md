@@ -22,6 +22,8 @@ The traditional features are embedded in the way commonly followed: discrete fea
 
 After the audio and text features are extracted, they pass through trainable MLP layers and are then merged with the previously extracted features to be input into various models, which ultimately output the predicted click-through rate.
 
+Furthermore, we applied the **MuQ-token** method to the multi-layer output of our ""MuQ"" model. By using discrete tokens to represent the audio features, we were able to achieve better results
+
 Our method is highly compatible with various models because it only adds more features without requiring any changes to the model's structure itself.
 
 ## Usage
