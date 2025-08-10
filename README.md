@@ -193,7 +193,7 @@ The MuQ model has two versions: **MuQ** and **MuQ-mulan**.
 ## Acknowledgement
 <!-- We sincerely appreciate the help provided by [Recbole](https://github.com/RUCAIBox/RecBole). -->
 
-We gratefully acknowledge the inspiration and guidance we received from frameworks [Recbole](https://github.com/RUCAIBox/RecBole), [MMRec](https://github.com/enoche/MMRec), and [FuxiCTR](https://github.com/reczoo/FuxiCTR).
+We gratefully acknowledge the inspiration from frameworks [Recbole](https://github.com/RUCAIBox/RecBole), [MMRec](https://github.com/enoche/MMRec), and [FuxiCTR](https://github.com/reczoo/FuxiCTR).
 
 ## Future
 We are working on adding more existing models, especially multimodal models.
